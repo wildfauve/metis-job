@@ -9,8 +9,3 @@ def test_create_spark_session():
     spark = spark_session()
 
     assert spark.version
-
-
-@inject
-def spark_session(session: SparkSession = dependency()):
-    return session

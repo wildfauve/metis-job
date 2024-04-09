@@ -53,7 +53,14 @@ class MonadicErrorAggregate:
 
 
 
-class DIInitialisationError(BaseError):
+class InitialisationError(BaseError):
     ...
 
+class RepoConfigError(BaseError):
+    ...
 
+class VocabNotFound(BaseError):
+    ...
+
+class SchemaMatchingError(BaseError):
+    ...

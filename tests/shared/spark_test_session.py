@@ -1,7 +1,17 @@
+import pytest
+from bevy import inject, dependency
 from delta import *
 import pyspark
+from pyspark.sql import SparkSession
 
 from metis_job import session
+
+from . import di
+
+@pytest.fixture
+def di_initialise_spark():
+    spark = create_session()
+    di.di_repo().set(SparkSession, spark)
 
 
 def create_session():
@@ -22,3 +32,8 @@ def delta_builder(session_name):
 
 def spark_session_config(spark: pyspark.sql.session) -> None:
     pass
+
+
+@inject
+def spark_session(session: SparkSession = dependency()):
+    return session

@@ -7,7 +7,6 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-bevy = "^2.0.2"
 metis-fn = "^0.1.0"
 pino = "^0.6.0"
 pendulum = "^3.0.0"
@@ -20,6 +19,7 @@ pyspark = "^3.5.1"
 delta-spark = "^3.1.0"
 bpython = "^0.24"
 pdbpp = "^0.10.3"
+bevy = "^2.0.2"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

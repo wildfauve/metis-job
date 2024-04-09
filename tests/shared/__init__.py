@@ -1,5 +1,4 @@
 from .spark_test_session import *
-
-from . import initialiser
-
-initialiser.initialisation_runner()
+from .job_config_test import *
+from .namespaces_and_tables import *
+from .di import *
