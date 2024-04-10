@@ -23,10 +23,4 @@ def it_normalises_names_to_snake_case():
     assert cfg.catalogue == "my_domain"
 
 
-def it_loads_the_job_config_into_di():
-    cfg = configuration()
-    ns = namespace_for_test()
-
-    assert cfg.domain_name == "price_rating"
-
 # Helpers

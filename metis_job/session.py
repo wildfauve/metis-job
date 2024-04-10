@@ -6,11 +6,11 @@ from pyspark.sql import SparkSession
 
 from metis_fn import fn
 
-def _create_session(session_name):
+def create_session(session_name):
     return SparkSession.builder.appName(session_name).enableHiveSupport().getOrCreate()
 
 
-def build_spark_session(session_name: str, create_fn: Callable = _create_session,
+def build_spark_session(session_name: str, create_fn: Callable = create_session,
                         config_adder_fn: Callable = fn.identity) -> SparkSession:
     """
     Generates a Spark session object.

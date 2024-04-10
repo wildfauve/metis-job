@@ -4,9 +4,10 @@ from delta import *
 import pyspark
 from pyspark.sql import SparkSession
 
-from metis_job import session
+import metis_job
 
 from . import di
+
 
 @pytest.fixture
 def di_initialise_spark():
@@ -15,9 +16,9 @@ def di_initialise_spark():
 
 
 def create_session():
-    return session.build_spark_session("test_spark_session",
-                                       spark_delta_session,
-                                       spark_session_config)
+    return metis_job.build_spark_session("test_spark_session",
+                                         spark_delta_session,
+                                         spark_session_config)
 
 
 def spark_delta_session(session_name):

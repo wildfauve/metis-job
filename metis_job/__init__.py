@@ -16,3 +16,8 @@ from .table import (
 from .schema import (
     Table
 )
+
+from .session import (
+    build_spark_session,
+    create_session
+)
