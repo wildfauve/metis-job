@@ -47,17 +47,13 @@ class NamingConventionProtocol(Protocol):
 
     def fully_qualified_name(self, table_name: str) -> str:
         """
-        The load location for reading a delta table using DeltaTable class.
+        """
+        ...
 
-        DeltaTable.forPath(spark, self.delta_table_location)
-
-        Used by Hive functions:
-        + DeltaTableReader().table
-        + DeltaFileReader().read
-        + StreamFileWriter().write
-
-
-        :param table_name:
+    def data_product_root(self) -> str:
+        """
+        Used by List tables.  Which is in turn used to determine if a table
+        exists in a name space
         :return:
         """
         ...
@@ -82,6 +78,9 @@ class SparkNamingConventionDomainBased(NamingConventionProtocol):
     def fully_qualified_name(self, table_name):
         return f"{self.namespace_name()}.{table_name}"
 
+    def data_product_root(self) -> str:
+        return self.namespace_name()
+
 
 class UnityNamingConventionDomainBased(NamingConventionProtocol):
     """
@@ -102,6 +101,9 @@ class UnityNamingConventionDomainBased(NamingConventionProtocol):
     def fully_qualified_name(self, table_name):
         return f"{self.catalogue()}.{self.namespace_name()}.{table_name}"
 
+    def data_product_root(self) -> str:
+        return f"{self.catalogue()}.{self.namespace_name()}"
+
 
 class NameSpace:
 
@@ -121,8 +123,7 @@ class NameSpace:
                 return UnityNamingConventionDomainBased(self.config)
             case _:
                 raise error.generate_error(error.ConfigurationError,
-                                          (422, 1))
-
+                                           (422, 1))
 
     #
     # DB LifeCycle Functions
@@ -148,7 +149,7 @@ class NameSpace:
         return self.session.catalog.tableExists(table_name)
 
     def list_tables(self):
-        return [table.name for table in self.session.catalog.listTables(self.naming.namespace_name())]
+        return [table.name for table in self.session.catalog.listTables(self.naming.data_product_root())]
 
     def table_format(self):
         return self.config.db.table_format

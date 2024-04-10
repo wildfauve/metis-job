@@ -8,6 +8,7 @@ def test_spark_naming_for_local():
     assert naming.catalogue() == "domain"
     assert naming.data_product_name() == "dp1"
     assert naming.fully_qualified_name("table1") == "dp1.table1"
+    assert naming.data_product_root() == "dp1"
 
 def test_unity_naming_for_local():
     naming = metis_job.UnityNamingConventionDomainBased(job_config=spark_naming())
@@ -16,6 +17,7 @@ def test_unity_naming_for_local():
     assert naming.catalogue() == "domain"
     assert naming.data_product_name() == "dp1"
     assert naming.fully_qualified_name("table1") == "domain.dp1.table1"
+    assert naming.data_product_root() == "domain.dp1"
 
 
 # Helpers
