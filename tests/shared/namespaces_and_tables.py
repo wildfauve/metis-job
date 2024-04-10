@@ -6,7 +6,7 @@ from . import *
 
 @pytest.fixture
 def dataproduct1_ns():
-    job_config = metis_job.JobConfig(domain_name="testDomain",
+    job_config = metis_job.JobConfig(catalogue="testDomain",
                                      data_product="dp1",
                                      service_name="test-job",
                                      job_mode=metis_job.JobMode.SPARK)

@@ -1,6 +1,8 @@
 # temp data area
 _temp/
 
+**/.DS_Store
+
 docs/http/*.private.env.json
 
 .df-repl-history

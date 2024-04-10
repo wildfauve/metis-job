@@ -17,13 +17,13 @@ class JobMode(Enum):
 
 @dataclass
 class JobConfig:
-    domain_name: str
+    catalogue: str
     data_product: str
     service_name: str
     job_mode: JobMode = field(default_factory=lambda: JobMode.UNITY)
 
     def __post_init__(self):
-        self.domain_name = normalise(self.domain_name)
+        self.catalogue = normalise(self.catalogue)
         self.service_name = normalise(self.service_name)
         self.data_product = normalise(self.data_product)
 

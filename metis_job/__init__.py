@@ -5,7 +5,8 @@ from .config import (
 
 from .namespace import (
     SparkNamingConventionDomainBased,
-    NameSpace
+    NameSpace,
+    UnityNamingConventionDomainBased
 )
 
 from .table import (

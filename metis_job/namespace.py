@@ -35,22 +35,17 @@ class NamingConventionProtocol(Protocol):
         """
         ...
 
-    def namespace_path(self) -> str:
+    def catalogue(self) -> str:
         """
-        Provide the location path for a database.  Used when creating or dropping the database.
-        :return:
         """
         ...
 
-    def namespace_table_path(self, table_name: str) -> str:
+    def data_product_name(self) -> str:
         """
-        The path location of the table.
-        :param table_name:
-        :return:
         """
         ...
 
-    def delta_table_location(self, table_name: str) -> str:
+    def fully_qualified_name(self, table_name: str) -> str:
         """
         The load location for reading a delta table using DeltaTable class.
 
@@ -67,35 +62,9 @@ class NamingConventionProtocol(Protocol):
         """
         ...
 
-    def checkpoint_location(self, table_name) -> str:
-        """
-        The location of the checkpoint folder when using delta streaming.
-
-        :param table_name:
-        :return:
-        """
-        ...
-
-    def delta_table_naming_correctly_configured(self) -> bool:
-        """
-        True if naming has been configured correctly for a delta table location, which will include possible
-        consideration for the checkpoint override required in testing.
-        :return:
-        """
-
 
 class SparkNamingConventionDomainBased(NamingConventionProtocol):
     """
-    DB and Table naming convention based on the names of the domain and data product.  Uses the following properties
-    from the config:
-
-        cfg = (spark_job.JobConfig(data_product_name=my_data_product_name,
-                                   domain_name=my_domain_name
-              .configure_hive_db(db_name="my_db"))
-
-    DB paths ion the cluster are absolute paths (i.e. prepended with a "/".  In test they must be relative paths.
-    This is driven by the setting of job_config().running_in_test().  Therefore, when using this strategy this must
-    be set for testing.
     """
 
     def __init__(self, job_config):
@@ -104,14 +73,34 @@ class SparkNamingConventionDomainBased(NamingConventionProtocol):
     def namespace_name(self):
         return self.config.data_product
 
-    def domain_name(self):
-        return self.config.domain_name
+    def catalogue(self):
+        return self.config.catalogue
 
     def data_product_name(self):
-        return self.config.data_product_name
+        return self.config.data_product
 
     def fully_qualified_name(self, table_name):
         return f"{self.namespace_name()}.{table_name}"
+
+
+class UnityNamingConventionDomainBased(NamingConventionProtocol):
+    """
+    """
+
+    def __init__(self, job_config):
+        self.config = job_config
+
+    def namespace_name(self):
+        return self.config.data_product
+
+    def catalogue(self):
+        return self.config.catalogue
+
+    def data_product_name(self):
+        return self.config.data_product
+
+    def fully_qualified_name(self, table_name):
+        return f"{self.catalogue()}.{self.namespace_name()}.{table_name}"
 
 
 class NameSpace:
