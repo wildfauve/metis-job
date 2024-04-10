@@ -8,8 +8,6 @@ from pyspark.sql import types as T
 from pyspark.sql import dataframe
 from delta.tables import *
 
-from . import repo_messages
-
 from metis_fn import fn, monad
 
 from metis_job.util import error

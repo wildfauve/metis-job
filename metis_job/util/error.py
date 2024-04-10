@@ -1,4 +1,18 @@
+from __future__ import annotations
+from typing import Type
 from metis_fn import monad, fn
+
+from . import error_messages
+
+def generate_error(error_cls: Type[BaseError], msg_path: tuple[int, int], *template_args):
+    code, _ = msg_path
+    msg = fn.deep_get(error_messages.msgs, msg_path)
+    if msg:
+        if len(template_args) == msg.count("{"):
+            return error_cls(msg.format(*template_args), code=code)
+        return error_cls(msg, code=code)
+    return error_cls("No message available", code=code)
+
 
 
 class BaseError(Exception):
@@ -63,4 +77,7 @@ class VocabNotFound(BaseError):
     ...
 
 class SchemaMatchingError(BaseError):
+    ...
+
+class ConfigurationError(BaseError):
     ...

@@ -7,7 +7,7 @@ from pyspark.sql import functions as F
 
 from metis_fn import fn
 
-from . import repo_messages, sql_builder
+from . import sql_builder
 
 db_prop_props_regex = r'(\([\s\#\$\*a-zA-Z0-9:,_-]+\))'
 db_prop_kv_regex = r'\((.+),(.+)\)'

@@ -5,5 +5,3 @@ from .readers import (
 from .properties import (
     TableProperty
 )
-
-from .repo_messages import *

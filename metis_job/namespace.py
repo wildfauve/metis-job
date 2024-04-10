@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Protocol
-from metis_job.util import logger
+from metis_job.util import logger, error
 from metis_job.repo import sql_builder, properties
 from . import config
 
@@ -117,8 +117,12 @@ class NameSpace:
         match self.config.job_mode:
             case config.JobMode.SPARK:
                 return SparkNamingConventionDomainBased(self.config)
+            case config.JobMode.UNITY:
+                return UnityNamingConventionDomainBased(self.config)
             case _:
-                breakpoint()
+                raise error.generate_error(error.ConfigurationError,
+                                          (422, 1))
+
 
     #
     # DB LifeCycle Functions
