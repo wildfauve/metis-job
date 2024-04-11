@@ -18,8 +18,8 @@ class CreateManagedDeltaTable:
                      table.schema,
                      table.fully_qualified_table_name(),
                      table.partition_on(),
-                     table.table_property_expr())
-        # table.property_manager.invalidate_property_cache()
+                     table.asserted_table_properties())
+        table.property_manager.invalidate_property_cache()
         pass
 
     def _create(self,
@@ -27,12 +27,26 @@ class CreateManagedDeltaTable:
                 schema,
                 fully_qualified_table_name: str,
                 partition_cols,
-                table_prop_expr):
-        breakpoint()
-        result = (DeltaTable.createIfNotExists(spark_session)
-                  .tableName(fully_qualified_table_name)
-                  .addColumns(schema)
-                  .execute())
+                table_props: list[repo.TableProperty]):
+
+        """
+        See https://docs.delta.io/latest/api/python/spark/index.html#delta.tables.DeltaTableBuilder
+        :param spark_session:
+        :param schema:
+        :param fully_qualified_table_name:
+        :param partition_cols:
+        :param table_props:
+        :return:
+        """
+        builder = (DeltaTable.createIfNotExists(spark_session)
+                   .tableName(fully_qualified_table_name)
+                   .addColumns(schema))
+        if partition_cols:
+            builder = builder.partitionedBy(partition_cols)
+        if table_props:
+            for prop in table_props:
+                builder = builder.property(prop.key, prop.value)
+        result = builder.execute()
         return result
 
 
