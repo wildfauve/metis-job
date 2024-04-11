@@ -81,3 +81,9 @@ class SchemaMatchingError(BaseError):
 
 class ConfigurationError(BaseError):
     ...
+
+class RepoWriteError(BaseError):
+    ...
+
+class RepoConfigurationError(BaseError):
+    ...

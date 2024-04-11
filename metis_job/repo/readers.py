@@ -46,7 +46,6 @@ class ReaderProtocol(Protocol):
 
     def read(self,
              repo,
-             table_name: str,
              reader_options: Optional[Set[ReaderSwitch]]) -> Optional[dataframe.DataFrame]:
         """
         Takes a repository object SparkRepo, and an optional table name and performs a read operation, returning a
@@ -68,14 +67,25 @@ class DeltaTableReader(ReaderProtocol):
              reader_options: set[ReaderSwitch] = None) -> dataframe.DataFrame | DeltaTable:
         if not repo.table_exists():
             return None
-        df = self._table(repo)
-        return df
+
+        if ReaderSwitch.GENERATE_DF_ON in self._merged_options(reader_options):
+            return self._table_as_df(repo)
+
+        if ReaderSwitch.GENERATE_DF_OFF in self._merged_options(reader_options):
+            return self._table_as_delta_table(repo)
+
+        return self._table_as_df(repo)
 
     #
-    def _table(self, repo) -> DeltaTable:
+    def _table_as_df(self, repo) -> DeltaTable:
         return repo.namespace.session.table(repo.fully_qualified_table_name())
+
+    def _table_as_delta_table(self, repo) -> DeltaTable:
+        return DeltaTable.forName(repo.namespace.session, repo.fully_qualified_table_name())
+
 
     def _merged_options(self, passed_reader_options: Set[ReaderSwitch] = None) -> Set[ReaderSwitch]:
         if not isinstance(passed_reader_options, set):
             return self.__class__.default_reader_options
-        return ReaderSwitch.merge_options(self.__class__.default_reader_options, passed_reader_options)
+        return ReaderSwitch.merge_options(self.__class__.default_reader_options.copy(),
+                                          passed_reader_options)

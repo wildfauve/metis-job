@@ -216,8 +216,8 @@ class TablePropertyManager(PropertyManager):
     def __init__(self,
                  session,
                  asserted_properties: List[TableProperty],
-                 db_table_name: str):
-        self.db_table_name = db_table_name
+                 fully_qualified_table_name: str):
+        self.fully_qualified_table_name = fully_qualified_table_name
         super().__init__(session, asserted_properties)
 
     def merge_table_properties(self):
@@ -245,13 +245,13 @@ class TablePropertyManager(PropertyManager):
     def get_table_properties(self) -> dataframe.DataFrame:
         if self.cached_properties:
             return self.cached_properties
-        self.cached_properties = self.session.sql(sql_builder.show_properties(self.db_table_name))
+        self.cached_properties = self.session.sql(sql_builder.show_properties(self.fully_qualified_table_name))
         return self.cached_properties
 
     def add_to_table_properties(self, to_add: Set[TableProperty]):
         if not to_add:
             return self
-        self.session.sql(sql_builder.set_properties(table_name=self.db_table_name,
+        self.session.sql(sql_builder.set_properties(table_name=self.fully_qualified_table_name,
                                                     props=TableProperty.table_property_expression(to_add)))
 
         self.invalidate_property_cache()
@@ -260,7 +260,7 @@ class TablePropertyManager(PropertyManager):
     def remove_from_table_properties(self, to_remove: Set[TableProperty]):
         if not to_remove:
             return self
-        self.session.sql(sql_builder.unset_properties(table_name=self.db_table_name,
+        self.session.sql(sql_builder.unset_properties(table_name=self.fully_qualified_table_name,
                                                       props=TableProperty.table_property_expression_keys(to_remove)))
         self.invalidate_property_cache()
         return self

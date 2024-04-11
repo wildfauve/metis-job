@@ -10,6 +10,7 @@ from .namespace import (
 )
 
 from .table import (
+    CreateManagedDeltaTable,
     DomainTable
 )
 
@@ -20,4 +21,9 @@ from .schema import (
 from .session import (
     build_spark_session,
     create_session
+)
+
+from .repo import (
+    DataAgreementType,
+    TableProperty
 )

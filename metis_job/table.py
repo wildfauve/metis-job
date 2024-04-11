@@ -1,11 +1,15 @@
 from __future__ import annotations
+
+from metis_fn import monad
 from pyspark.sql import dataframe
 from delta.tables import *
 
 from metis_job import repo
 from . import namespace as ns
+from .util import error
 
 ReaderType = repo.DeltaTableReader
+WriterType = repo.DeltaTableWriter
 
 
 class CreateManagedDeltaTable:
@@ -24,6 +28,7 @@ class CreateManagedDeltaTable:
                 fully_qualified_table_name: str,
                 partition_cols,
                 table_prop_expr):
+        breakpoint()
         result = (DeltaTable.createIfNotExists(spark_session)
                   .tableName(fully_qualified_table_name)
                   .addColumns(schema)
@@ -36,19 +41,28 @@ class DomainTable:
     table_name = None
     partition_columns = None
     table_properties = None
+    table_format = "delta"
 
     def __init__(self,
                  namespace: ns.NameSpace = None,
                  reader: ReaderType = repo.DeltaTableReader,
+                 writer: WriterType = repo.DeltaTableWriter,
                  table_creation_protocol=CreateManagedDeltaTable):
         self.namespace = namespace
         self.reader = reader
+        self.writer = writer
         self.table_creation_protocol = table_creation_protocol
 
+        self.property_manager = repo.properties.TablePropertyManager(
+            session=self.namespace.session,
+            asserted_properties=self.asserted_table_properties(),
+            fully_qualified_table_name=self.fully_qualified_table_name())
+
+        self.properties = self.property_manager  # hides, a little, the class managing properties.
         self.after_initialise()  # callback Hook
 
-    def read(self) -> dataframe.DataFrame:
-        return self.reader().read(self, self.fully_qualified_table_name())
+    def read(self, reader_options=None) -> dataframe.DataFrame:
+        return self.reader().read(self, reader_options=reader_options)
 
     def table_exists(self) -> bool:
         return self.namespace.table_exists(self.__class__.table_name)
@@ -59,9 +73,15 @@ class DomainTable:
     def partition_on(self):
         return self.__class__.partition_columns if hasattr(self, 'partition_columns') else tuple()
 
+    def prune_on(self):
+        return self.__class__.pruning_column if hasattr(self, 'pruning_column') else None
+
+    def merge_condition(self):
+        return self.identity_merge_condition if hasattr(self, 'identity_merge_condition') else None
+
     def perform_table_creation_protocol(self):
         if not self.table_creation_protocol and not self.__class__.table_creation_protocol:
-            raise repo.hive_table_can_not_be_created_no_protocol_provided()
+            raise error.generate_error(error.RepoConfigurationError, (422, 2))
         if self.table_creation_protocol:
             self.table_creation_protocol().perform(self)
         else:
@@ -74,6 +94,41 @@ class DomainTable:
     def asserted_table_properties(self):
         return self.__class__.table_properties if hasattr(self, 'table_properties') else None
 
-    # Noop Callbacks
+    #
+    # Table Write Functions
+    #
+    def create_df(self, data, schema=None):
+        return self.db.session.createDataFrame(data=data,
+                                               schema=self.determine_schema_to_use_for_df(schema))
+
+    def try_write_append(self, df, options: Optional[List[repo.SparkOption]] = []):
+        result = self.writer().try_write_append(self, df, options)
+        self.after_append(result)
+        return result
+
+    def try_upsert(self, df, options: Optional[List[repo.SparkOption]] = []):
+        """
+        The try_upsert wraps the upsert function with a Try monad.  The result will be an Either.  A successful result
+        usually returns Right(None).
+        """
+        if not self.table_exists():
+            return self.try_write_append(df)
+
+        result = self.writer().try_upsert(self,
+                                          self.read(reader_options={repo.ReaderSwitch.GENERATE_DF_OFF}),
+                                          df,
+                                          options)
+
+        self.after_upsert()  # callback hook.
+
+        return result
+
+    # Abstract Callbacks
     def after_initialise(self):
+        ...
+
+    def after_append(self, _result):
+        ...
+
+    def after_upsert(self):
         ...

@@ -1,7 +1,17 @@
 from .readers import (
-    DeltaTableReader
+    DeltaTableReader,
+    ReaderSwitch
 )
 
 from .properties import (
+    DataAgreementType,
     TableProperty
+)
+
+from .spark_util import (
+    SparkOption
+)
+
+from .writers import (
+    DeltaTableWriter
 )

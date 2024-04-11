@@ -8,7 +8,7 @@ docs/http/*.private.env.json
 .df-repl-history
 
 # Pycharm
-.idea/
+**/.idea
 # test hive dbs
 spark-warehouse/
 metastore_db/
