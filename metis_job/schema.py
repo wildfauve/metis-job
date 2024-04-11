@@ -7,7 +7,11 @@ from metis_fn import fn, monad
 from pyspark.sql.types import StructType, StructField
 
 from metis_job.util import json_util, error
-from metis_job.structure import schema_util as su, vocab_util as V, value, schema_util
+from metis_job.structure import (
+    schema_util as su,
+    vocab_util as V,
+    value,
+    schema_util)
 
 
 def default_cell_builder(cell):

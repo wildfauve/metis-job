@@ -14,10 +14,6 @@ class SparkOption(Enum):
     """
     MERGE_SCHEMA = ({'mergeSchema': 'true'},
                     ('spark.databricks.delta.schema.autoMerge.enabled', 'true'))
-    COSMOS_INFER_SCHEMA = ({"spark.cosmos.read.inferSchema.enabled": "true"},)
-    COSMOS_ITEM_OVERWRITE = ({"spark.cosmos.write.strategy": "ItemOverwrite"},)
-    COSMOS_READ_PARTITION_DEFAULT = ({"spark.cosmos.read.partitioning.strategy": "Default"},)
-    COSMOS_CHANGE_FEED_INCREMENTAL = ({"spark.cosmos.changeFeed.mode": "Incremental"},)
 
     @classmethod
     def function_based_options(cls, options) -> Dict:
