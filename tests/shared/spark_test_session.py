@@ -12,7 +12,7 @@ from . import di
 @pytest.fixture
 def di_initialise_spark():
     spark = create_session()
-    di.di_repo().set(SparkSession, spark)
+    di.di_container().set(SparkSession, spark)
 
 
 def create_session():

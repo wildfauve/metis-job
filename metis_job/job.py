@@ -1,43 +1,36 @@
-from typing import Tuple, Callable, List, Set
-import types
-from importlib import import_module
-from pathlib import Path
-from pymonad.tools import curry
-from inspect import getmembers, ismodule
+from typing import Callable
 
-from .command import simple_streamer
-from jobsworthy import model, repo
-from jobsworthy.util import singleton
+from metis_fn import singleton
+from metis_job import runner
+from metis_job.util import logger, mod
 
 
 def job(initialiser_module: str = None):
     """
-    Job provides a decorator which wraps the execution of a spark job.  You use the decorator at the entry point of the job
+    Job provides a decorator which wraps the execution of a spark runner.  You use the decorator at the entry point of the runner
 
-    @spark_job.job(initialiser_module="tests.shared.initialisers")
+    @spark_job.runner(initialiser_module="tests.shared.initialisers")
     def execute(args=None, location_partitioner: Callable = date_partitioner) -> monad.EitherMonad[value.JobState]:
         pass
 
     The initialiser_module provided to the decorator is a module in import path format.  All non "__init__.py" modules
     in this module will be dynamically imported, and those which are decorated with @spark_job.register() will be
-    executed before the job starts.  This is a great place to include any state, functions, etc, which need to be
-    initialised before starting the job.
+    executed before the runner starts.  This is a great place to include any state, functions, etc, which need to be
+    initialised before starting the runner.
 
     Job does the following:
-    + It calls the initialiser to run all the initialisations registered
-    + It then invokes the job function with all args and kwargs.
-    + At job completion it simply returns whatever the job function returned.
+    + It calls the random_initialisers to run all the initialisations registered
+    + It then invokes the runner function with all args and kwargs.
+    + At runner completion it simply returns whatever the runner function returned.
 
     """
 
     def inner(fn):
         def invoke(*args, **kwargs):
-            mod = kwargs.get('initialiser_module', None) or initialiser_module
-
-            # if mod:
-            #     initialisation_importer(mod)
-
-            initialisation_runner()
+            init_mod = kwargs.get('initialiser_module', None) or initialiser_module
+            if init_mod:
+                mod.import_module(init_mod)
+                initialisation_runner()
             result = fn(*args, **kwargs)
             return result
 
@@ -46,73 +39,94 @@ def job(initialiser_module: str = None):
     return inner
 
 
-def simple_streaming_job(from_table,
-                         to_table,
-                         transformer: Callable,
-                         write_type: model.StreamWriteType,
-                         from_reader_options: Set[repo.ReaderSwitch] = None,
-                         options: List[repo.SparkOption] = None):
+def simple_batch_job(from_input: Callable,
+                     to_table: Callable,
+                     transformer: Callable):
     """
     """
+
     def inner(fn):
         def invoke(*args, **kwargs):
-            result = simple_streamer.run(from_table=from_table,
-                                         to_table=to_table,
-                                         transformer=transformer,
-                                         write_type=write_type,
-                                         from_reader_options=from_reader_options,
-                                         options=options)
+            batcher = runner.build_batch_run(from_input=from_input,
+                                             transformer=transformer,
+                                             to_table=to_table)
+            pre_run_result = fn(batcher)
+            if isinstance(pre_run_result, tuple):
+                batcher, ctx, callback = pre_run_result
+                batcher.with_run_ctx(ctx).after_run_callback(callback)
 
-            return fn(result=result)
+            result = batcher.run()
+
+            if batcher.callback and callable(batcher.callback):
+                return batcher.callback(result)
+            return result
+
 
         return invoke
 
     return inner
 
 
+# def simple_streaming_job(from_table,
+#                          to_table,
+#                          transformer: Callable,
+#                          write_type: model.StreamWriteType,
+#                          from_reader_options: Set[repo.ReaderSwitch] = None,
+#                          options: List[repo.SparkOption] = None):
+#     """
+#     """
+#     def inner(fn):
+#         def invoke(*args, **kwargs):
+#             result = simple_streamer.run(from_table=from_table,
+#                                          to_table=to_table,
+#                                          transformer=transformer,
+#                                          write_type=write_type,
+#                                          from_reader_options=from_reader_options,
+#                                          options=options)
+#
+#             return fn(result=result)
+#
+#         return invoke
+#
+#     return inner
+
+
 class Initialiser(singleton.Singleton):
     init_fns = []
 
-    def add_initialiser(self, fn):
-        self.init_fns.append(fn)
+    def add_initialiser(self, f, order):
+        self.init_fns.append((f, order))
 
     def invoke_fns(self):
-        [f() for f in self.init_fns]
+        [self._invoke(f) for f, _ in sorted(self.init_fns, key=lambda f: f[1])]
+
+    def _invoke(self, f):
+        result = f()
+        if result.is_right():
+            status = "ok"
+        else:
+            status = f"fail: error: {result.error().message}"
+            logger.info(f"Calling Initialisation fn: {f.__name__} with result: {status}")
+        return result
 
 
-def register():
+def initialiser_register(order: int):
     """
-    Decorator for registering initialisers to be run prior to the main job execution.  Note that the module containing
-    the initialiser must be imported before the job entry point is called.
+    Decorator for registering initialisers to be run prior to the main handler execution.  Note that the module containing
+    the random_initialisers must be imported before the runner entry point is called.
 
-    @spark_job.register()
+    @metis_job.initialiser_register(order=1)
     def session_builder():
         pass
 
-    All registered initialisers are invoked, in the order of registration, by the job decorator.
+    All registered initialisers are invoked, in the order defined by the order arg
     """
 
-    def inner(fn):
-        Initialiser().add_initialiser(fn=fn)
+    def inner(f):
+        Initialiser().add_initialiser(f=f, order=order)
 
     return inner
 
 
 def initialisation_runner():
     Initialiser().invoke_fns()
-
-# def initialisation_importer(initialiser_mod: types.ModuleType):
-#     list(map(import_initialiser, getmembers(initialiser_mod, ismodule)))
-#
-# def files_in_init_path(path):
-#     return list(path.glob("**/*.py"))
-#
-# def import_initialiser(module: Tuple[str, types.ModuleType]) -> None:
-#     pass
-#     # breakpoint()
-#     # if "__" in file.name:
-#     #     return None
-#     # full_module = f"{module}.{file.name.replace('.py', '')}"
-#     # logger.info(msg=f"JobsWorth:import_initialiser, importing initialiser: {full_module}")
-#     # import_module(full_module)
-#     # pass

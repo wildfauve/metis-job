@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class DataClassAbstract:
+class BaseValue:
     def replace(self, key, value):
         setattr(self, key, value)
         return self

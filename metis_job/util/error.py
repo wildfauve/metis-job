@@ -87,3 +87,6 @@ class RepoWriteError(BaseError):
 
 class RepoConfigurationError(BaseError):
     ...
+
+class TransformerError(BaseError):
+    ...

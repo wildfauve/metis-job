@@ -3,6 +3,7 @@ import metis_job
 from pyspark.sql import types as T
 
 from . import *
+from . import di
 
 my_table_schema = T.StructType(
     [
@@ -12,24 +13,32 @@ my_table_schema = T.StructType(
         T.StructField('pythons',
                       T.ArrayType(T.StructType([T.StructField('id', T.StringType(), True)]), True),
                       True),
-        T.StructField('season', T.StringType(), True),
-        T.StructField('onStream', T.StringType(), False)
+        T.StructField('season', T.StringType(), True)
     ])
 
+@pytest.fixture
+def namespace_wrapper():
+    yield
+    di.di_container().get(metis_job.NameSpace).drop_namespace()
 
 @pytest.fixture
 def dataproduct1_ns():
-    job_config = metis_job.JobConfig(catalogue="testDomain",
-                                     data_product="dp1",
-                                     service_name="test-job",
-                                     job_mode=metis_job.JobMode.SPARK)
-
-    namespace = metis_job.NameSpace(session=spark_test_session.spark_session(),
-                                    job_config=job_config)
+    cfg, namespace = dp1_cfg_ns()
 
     yield namespace
 
     namespace.drop_namespace()
+
+
+def dp1_cfg_ns():
+    job_config = metis_job.JobConfig(catalogue="testDomain",
+                                     data_product="dp1",
+                                     service_name="test-runner",
+                                     job_mode=metis_job.JobMode.SPARK)
+
+    namespace = metis_job.NameSpace(session=spark_test_session.spark_session(),
+                                    job_config=job_config)
+    return job_config, namespace
 
 
 def my_table_cls():
@@ -53,27 +62,27 @@ def my_table_cls():
 
     return MyTable
 
+class MyTable2(metis_job.DomainTable):
+    table_name = "my_hive_table_2"
+
+    table_creation_protocol = metis_job.CreateManagedDeltaTable
+
+    temp_table_name = "_temp_my_hive_table_2"
+
+    partition_columns = ("name",)
+
+    pruning_column = 'name'
+
+    schema = my_table_schema
+
+    def after_initialise(self):
+        self.perform_table_creation_protocol()
+
+    def identity_merge_condition(self, name_of_baseline, update_name):
+        return f"{name_of_baseline}.id = {update_name}.id"
+
 
 def my_table2_cls():
-    class MyTable2(metis_job.DomainTable):
-        table_name = "my_hive_table_2"
-
-        table_creation_protocol = metis_job.CreateManagedDeltaTable
-
-        temp_table_name = "_temp_my_hive_table_2"
-
-        partition_columns = ("name",)
-
-        pruning_column = 'name'
-
-        schema = my_table_schema
-
-        def after_initialise(self):
-            self.perform_table_creation_protocol()
-
-        def identity_merge_condition(self, name_of_baseline, update_name):
-            return f"{name_of_baseline}.id = {update_name}.id"
-
     return MyTable2
 
 

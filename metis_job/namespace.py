@@ -10,7 +10,7 @@ class NamingConventionProtocol(Protocol):
 
     def namespace_name(self) -> str:
         """
-        The database name is provide in the dbconfig section of the job config.  This function returns that name.
+        The database name is provide in the dbconfig section of the runner config.  This function returns that name.
         :return:
         """
         ...

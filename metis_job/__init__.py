@@ -9,6 +9,17 @@ from .namespace import (
     UnityNamingConventionDomainBased
 )
 
+from .job import (
+    job,
+    initialiser_register,
+    simple_batch_job
+)
+
+from .runner import (
+    BatchValue,
+    Batcher
+)
+
 from .table import (
     CreateManagedDeltaTable,
     DomainTable

@@ -1,26 +1,17 @@
-from typing import Callable, List, Set
-from metis_job import repo
+from typing import Callable
+
+from . import batch_runner
 
 
-# def run(from_table: Callable,
-#         to_table: Callable,
-#         transformer: Callable,
-#         write_type: repo.StreamWriteType,
-#         from_reader_options: Set[repo.ReaderSwitch] = None,
-#         options: List[repo.SparkOption] = None):
-#     return stream_model(from_table, to_table, transformer, write_type, from_reader_options, options).run()
-#
-#
-# def stream_model(from_table: Callable,
-#                  to_table: Callable,
-#                  transformer: Callable,
-#                  write_type: repo.StreamWriteType,
-#                  from_reader_options: Set[repo.ReaderSwitch],
-#                  options: List[repo.SparkOption]):
-#     return (repo.Streamer().stream_from(from_table(),
-#                                          stream_from_reader_options=from_reader_options)
-#             .stream_to((to_t:= to_table()),
-#                        partition_columns=to_t.partition_columns,
-#                        write_type=write_type,
-#                        options=options)
-#             .with_transformer(transformer))
+def build_batch_run(from_input: Callable,
+                    transformer: Callable,
+                    to_table: Callable):
+    return batch_model(from_input, to_table, transformer)
+
+
+def batch_model(from_input: Callable,
+                to_table: Callable,
+                transformer: Callable):
+    return (batch_runner.Batcher().from_input(from_input)
+            .with_transformer(transformer)
+            .to_table(to_table))

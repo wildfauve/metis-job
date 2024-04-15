@@ -25,5 +25,5 @@ def test_unity_naming_for_local():
 def spark_naming():
     return metis_job.JobConfig(catalogue="domain",
                                data_product="dp1",
-                               service_name="test-job",
+                               service_name="test-runner",
                                job_mode=metis_job.JobMode.SPARK)

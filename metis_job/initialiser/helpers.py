@@ -25,7 +25,7 @@ class Initialiser(singleton.Singleton):
 def register(order: int):
     """
     Decorator for registering initialisers to be run prior to the main handler execution.  Note that the module containing
-    the initialiser must be imported before the job entry point is called.
+    the random_initialisers must be imported before the runner entry point is called.
 
     @helpers.register(order=1)
     def session_builder():
