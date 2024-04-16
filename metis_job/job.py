@@ -50,7 +50,9 @@ def simple_batch_job(from_input: Callable,
             batcher = runner.build_batch_run(from_input=from_input,
                                              transformer=transformer,
                                              to_table=to_table)
-            pre_run_result = fn(batcher)
+
+            pre_run_result = fn(**{**kwargs, **{"batcher": batcher}})
+
             if isinstance(pre_run_result, tuple):
                 batcher, ctx, callback = pre_run_result
                 batcher.with_run_ctx(ctx).after_run_callback(callback)

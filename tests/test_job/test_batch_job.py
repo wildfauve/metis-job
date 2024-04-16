@@ -26,7 +26,7 @@ def it_runs_the_initialisers_in_order():
 
 
 def it_runs_a_simple_batch_job(namespace_wrapper):
-    result = run_batch_job()
+    result = run_batch_job(args=sys_args_())
 
     assert result.is_right()
 
@@ -60,8 +60,8 @@ def run_noop_job():
 @metis_job.simple_batch_job(from_input=get_some_input,
                             transformer=noop_transformer,
                             to_table=write_to_table)
-def run_batch_job(run: metis_job.Batcher):
-    return run, "test-run-ctx", run_batch_job_callback
+def run_batch_job(args, batcher: metis_job.Batcher):
+    return batcher, "-".join(args), run_batch_job_callback
 
 
 def run_batch_job_callback(result: monad.Either[error.BaseError, metis_job.BatchValue]):
@@ -72,3 +72,7 @@ def run_batch_job_callback(result: monad.Either[error.BaseError, metis_job.Batch
 @inject
 def my_table_2(table: namespaces_and_tables.MyTable2 = dependency()):
     return table
+
+
+def sys_args_():
+    return ["--some-system-args"]
