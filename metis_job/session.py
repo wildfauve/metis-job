@@ -2,11 +2,27 @@ from typing import Callable, List, Tuple
 from functools import reduce
 
 from bevy import dependency
-from pyspark.sql import SparkSession
+from pyspark.sql.session import SparkSession
 
 from metis_fn import fn
 
 def create_session(session_name):
+    """
+    This does not work on the Databricks Cluster, failing with a
+    [CANNOT_CONFIGURE_SPARK_CONNECT_MASTER] Spark Connect server and Spark master cannot be configured together
+    :param session_name:
+    :return:
+    """
+    return SparkSession.builder.appName(session_name).getOrCreate()
+
+def create_connect_session(session_name):
+    """
+    This might work on the cluster, but connect comes with a ton of other dependencies, such as Pandas.
+    We don't need it to run locally.
+    :param session_name:
+    :return:
+    """
+    from pyspark.sql.connect.session import SparkSession
     return SparkSession.builder.appName(session_name).getOrCreate()
 
 
