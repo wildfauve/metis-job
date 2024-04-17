@@ -57,16 +57,16 @@ def run_noop_job():
 
 
 @metis_job.job(initialiser_module='tests.shared.job_initialisers')
-@metis_job.simple_batch_job(from_input=get_some_input,
+@metis_job.simple_spark_job(from_input=get_some_input,
                             transformer=noop_transformer,
                             to_table=write_to_table)
-def run_batch_job(args, batcher: metis_job.Batcher):
-    return batcher, "-".join(args), run_batch_job_callback
+def run_batch_job(args, runner: metis_job.SimpleJob):
+    return runner, "-".join(args), run_job_callback
 
 
-def run_batch_job_callback(result: monad.Either[error.BaseError, metis_job.BatchValue]):
-    batch = result.value
-    return monad.Right(batch.replace('run_ctx', f"{batch.run_ctx}-->Done!"))
+def run_job_callback(result: monad.Either[error.BaseError, metis_job.SimpleJobValue]):
+    job = result.value
+    return monad.Right(job.replace('run_ctx', f"{job.run_ctx}-->Done!"))
 
 
 @inject

@@ -39,7 +39,7 @@ def job(initialiser_module: str = None):
     return inner
 
 
-def simple_batch_job(from_input: Callable,
+def simple_spark_job(from_input: Callable,
                      to_table: Callable,
                      transformer: Callable):
     """
@@ -47,22 +47,21 @@ def simple_batch_job(from_input: Callable,
 
     def inner(fn):
         def invoke(*args, **kwargs):
-            batcher = runner.build_batch_run(from_input=from_input,
-                                             transformer=transformer,
-                                             to_table=to_table)
+            job_runner = runner.build_simple_run(from_input=from_input,
+                                                 transformer=transformer,
+                                                 to_table=to_table)
 
-            pre_run_result = fn(**{**kwargs, **{"batcher": batcher}})
+            pre_run_result = fn(**{**kwargs, **{"runner": job_runner}})
 
             if isinstance(pre_run_result, tuple):
-                batcher, ctx, callback = pre_run_result
-                batcher.with_run_ctx(ctx).after_run_callback(callback)
+                job_runner, ctx, callback = pre_run_result
+                job_runner.with_run_ctx(ctx).after_run_callback(callback)
 
-            result = batcher.run()
+            result = job_runner.run()
 
-            if batcher.callback and callable(batcher.callback):
-                return batcher.callback(result)
+            if job_runner.callback and callable(job_runner.callback):
+                return job_runner.callback(result)
             return result
-
 
         return invoke
 

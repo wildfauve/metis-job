@@ -1,11 +1,11 @@
-from .simple_batcher import (
-    build_batch_run
+from .simple_job import (
+    build_simple_run
 )
 
-from .batch_runner import (
-    Batcher
+from .job_runner import (
+    SimpleJob
 )
 
 from .value import (
-    BatchValue
+    SimpleJobValue
 )

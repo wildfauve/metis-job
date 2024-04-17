@@ -9,7 +9,7 @@ from . import value
 from ..util import error
 
 
-class Batcher:
+class SimpleJob:
 
     def __init__(self):
         self.input_fn = None
@@ -64,32 +64,32 @@ class Runner:
                 >> self.writer)
 
     def setup_value(self, batch):
-        val = value.BatchValue(config=batch)
+        val = value.SimpleJobValue(config=batch)
         val.run_ctx = batch.ctx
         return monad.Right(val)
 
-    def data_getter(self, val: value.BatchValue):
+    def data_getter(self, val: value.SimpleJobValue):
         result = val.config.input_fn(**self._kw_args(val))
         if result.is_left():
             val.error = result.error()
             return monad.Left(val)
         return monad.Right(val.replace('input_df', result.value))
 
-    def transformer(self, val: value.BatchValue):
+    def transformer(self, val: value.SimpleJobValue):
         result = val.config.transformer_fn(val.input_df, **self._kw_args(val))
         if result.is_left():
             val.error = result.error()
             return monad.Left(val)
         return monad.Right(val.replace('transformed_df', result.value))
 
-    def writer(self, val: value.BatchValue):
+    def writer(self, val: value.SimpleJobValue):
         result = val.config.writer_fn(val.transformed_df, **self._kw_args(val))
         if result.is_left():
             val.error = result.error()
             return monad.Left(val)
         return monad.Right(val)
 
-    def _kw_args(self, val: value.BatchValue):
+    def _kw_args(self, val: value.SimpleJobValue):
         if val.run_ctx:
             return {'ctx': val.run_ctx}
         return {}

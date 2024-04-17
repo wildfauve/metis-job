@@ -12,12 +12,12 @@ from .namespace import (
 from .job import (
     job,
     initialiser_register,
-    simple_batch_job
+    simple_spark_job
 )
 
 from .runner import (
-    BatchValue,
-    Batcher
+    SimpleJobValue,
+    SimpleJob
 )
 
 from .table import (
