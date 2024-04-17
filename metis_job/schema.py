@@ -167,7 +167,7 @@ class Column:
                   nullable: bool = False,
                   validator: Callable = always_valid_validator,
                   cell_builder: Callable = default_cell_builder):
-        self.schema = su.build_long_field(term, self.vocab, nullable=nullable)
+        self.schema = su.build_timestamp_field(term, self.vocab, nullable=nullable)
         return self.callback
 
     def array(self,
