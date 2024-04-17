@@ -36,7 +36,7 @@ from .session import (
 
 from .repo import (
     DataAgreementType,
-    DeltaStreamingTableWriter,
+    DatabricksCloudFilesStreamer,
     DeltaStreamingTableWriter,
     TableProperty,
     SparkOption,
