@@ -162,6 +162,14 @@ class Column:
         self.schema = su.build_long_field(term, self.vocab, nullable=nullable)
         return self.callback
 
+    def timestamp(self,
+                  term,
+                  nullable: bool = False,
+                  validator: Callable = always_valid_validator,
+                  cell_builder: Callable = default_cell_builder):
+        self.schema = su.build_long_field(term, self.vocab, nullable=nullable)
+        return self.callback
+
     def array(self,
               term,
               scalar_type,
@@ -403,6 +411,7 @@ def literal_decimal_builder(cell: Cell) -> str:
 
 def build_struct_field(vocab_path: str, vocab, struct_type: StructType, nullable: bool) -> StructField:
     return schema_util.build_struct_field(vocab_path, vocab, struct_type, nullable)
+
 
 type_id_label_struct = schema_util.type_id_label_struct
 

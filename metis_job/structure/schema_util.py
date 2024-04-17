@@ -1,4 +1,10 @@
-from pyspark.sql.types import StructType, StructField, StringType, ArrayType, LongType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    StringType,
+    ArrayType,
+    LongType,
+    TimestampType)
 
 from metis_job.structure import vocab_util as V
 
@@ -44,6 +50,11 @@ def build_decimal_field(vocab_path, vocab, decimal_type, nullable) -> StructFiel
 def build_long_field(vocab_path, vocab, nullable) -> StructField:
     term, meta = V.term_and_meta(vocab_path, vocab)
     return build_field(term, LongType(), metadata=meta, nullable=nullable)
+
+
+def build_timestamp_field(vocab_path, vocab, nullable) -> StructField:
+    term, meta = V.term_and_meta(vocab_path, vocab)
+    return build_field(term, TimestampType(), metadata=meta, nullable=nullable)
 
 
 def build_array_field(vocab_path, vocab, struct_type, nullable) -> StructField:
