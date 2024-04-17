@@ -14,6 +14,8 @@ class SparkOption(Enum):
     """
     MERGE_SCHEMA = ({'mergeSchema': 'true'},
                     ('spark.databricks.delta.schema.autoMerge.enabled', 'true'))
+    RECURSIVE_LOOKUP = ({'recursiveFileLookup':'true'},)
+    JSON_CLOUD_FILES_FORMAT = ({"cloudFiles.format": "json"}, )
 
     @classmethod
     def function_based_options(cls, options) -> Dict:

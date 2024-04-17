@@ -22,4 +22,3 @@ def di_container():
 
     di.set(table_cls, table)
     return monad.Right(di)
-

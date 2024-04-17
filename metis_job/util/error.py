@@ -90,3 +90,6 @@ class RepoConfigurationError(BaseError):
 
 class TransformerError(BaseError):
     ...
+
+class CloudFilesStreamingError(BaseError):
+    ...

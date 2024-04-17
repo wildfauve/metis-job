@@ -36,5 +36,14 @@ from .session import (
 
 from .repo import (
     DataAgreementType,
-    TableProperty
+    DeltaStreamingTableWriter,
+    DeltaStreamingTableWriter,
+    TableProperty,
+    SparkOption,
+    SparkRecursiveFileStreamer,
+    SparkStreamingTableWriter
+)
+
+from .cloud_files import (
+    CloudFiles
 )
