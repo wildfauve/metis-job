@@ -21,6 +21,7 @@ class JobConfig:
     data_product: str
     service_name: str
     job_mode: JobMode = field(default_factory=lambda: JobMode.UNITY)
+    checkpoint_location: str | None = None
 
     def __post_init__(self):
         self.catalogue = normalise(self.catalogue)
