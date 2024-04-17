@@ -31,7 +31,8 @@ from .schema import (
 
 from .session import (
     build_spark_session,
-    create_session
+    create_session,
+    create_connect_session
 )
 
 from .repo import (
