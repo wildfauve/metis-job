@@ -10,10 +10,13 @@ def create_session(session_name):
     """
     This does not work on the Databricks Cluster, failing with a
     [CANNOT_CONFIGURE_SPARK_CONNECT_MASTER] Spark Connect server and Spark master cannot be configured together
+
+    Solution: It looks like the appName function is getting in the way; that is the job set appname is
+    not the same as the cluster set appName, hence the error above.
     :param session_name:
     :return:
     """
-    return SparkSession.builder.appName(session_name).getOrCreate()
+    return SparkSession.builder.getOrCreate()
 
 def create_connect_session(session_name):
     """
@@ -23,7 +26,7 @@ def create_connect_session(session_name):
     :return:
     """
     from pyspark.sql.connect.session import SparkSession
-    return SparkSession.builder.appName(session_name).getOrCreate()
+    return SparkSession.builder.getOrCreate()
 
 
 # def create_session(session_name):
