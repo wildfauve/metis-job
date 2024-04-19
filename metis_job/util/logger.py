@@ -4,10 +4,9 @@ from pino import pino
 import sys
 from functools import reduce
 import time
-from metis_fn import chronos
 
 from .tracer import Tracer
-from . import json_util
+from . import json_util, chronos
 
 
 def info(msg: str, tracer: Tracer | None = None, status: str = 'ok', ctx: dict = {}) -> None:

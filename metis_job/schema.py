@@ -3,10 +3,9 @@ import json
 from functools import reduce, partial
 from pymonad.tools import curry
 from pyspark.sql import types as T
-from metis_fn import fn, monad
 from pyspark.sql.types import StructType, StructField
 
-from metis_job.util import json_util, error
+from metis_job.util import json_util, error, fn, monad
 from metis_job.structure import (
     schema_util as su,
     vocab_util as V,
@@ -206,7 +205,7 @@ class Column:
         return self.callback
 
 
-class Table:
+class Schema:
 
     def __init__(self,
                  columns: List[Column] = None,
@@ -329,18 +328,18 @@ class Cell:
 
 
 class Row:
-    def __init__(self, table: Table):
-        self.table = table
+    def __init__(self, schema: Schema):
+        self.schema = schema
         self.cells = []
 
     def cell_factory(self, column_or_vocab: Union[Column, str]) -> Cell:
         if not isinstance(column_or_vocab, str):
             return self.cell_from_column(column_or_vocab)
-        term, _meta = V.term_and_meta(column_or_vocab, self.table.vocab)
+        term, _meta = V.term_and_meta(column_or_vocab, self.schema.vocab)
         return self.cell_from_schema_name(term)
 
     def cell_from_schema_name(self, name: str):
-        column = fn.find(self.schema_name_predicate(name), self.table.columns)
+        column = fn.find(self.schema_name_predicate(name), self.schema.columns)
         if not column:
             raise error.SchemaMatchingError(f"Can not find column with term {name}")
         cell = Cell(column=column)
@@ -355,10 +354,10 @@ class Row:
         return cell
 
     def build_ordered_row_values(self):
-        return reduce(self.build_cell, self.table.columns, tuple())
+        return reduce(self.build_cell, self.schema.columns, tuple())
 
     def build_ordered_row_values_as_exception(self):
-        return reduce(self.cell_exception_builder, self.table.columns, tuple())
+        return reduce(self.cell_exception_builder, self.schema.columns, tuple())
 
     def cell_exception_builder(self, row_value, column):
         cell = fn.find(self.find_cell_predicate(column), self.cells)

@@ -49,9 +49,10 @@ class DatabricksCloudFilesStreamer:
                 .readStream
                 .format(self.__class__.format)
                 .options(**self._spark_opts(cloud_file))
+                .schema(cloud_file.schema)
                 .load(cloud_file.cloud_source))
 
     def _spark_opts(self, cloud_file):
-        opts = metis_job.SparkOption.function_based_options(self.__class__.default_spark_options + self.spark_options)
-        return {**spark_util.SparkOption.function_based_options(opts),
-                **{'checkpointLocation': cloud_file.checkpoint_location}}
+        opts = spark_util.SparkOption.function_based_options(self.__class__.default_spark_options + self.spark_options)
+        return {**opts,
+                **{'cloudFiles.schemaLocation': cloud_file.checkpoint_location}}

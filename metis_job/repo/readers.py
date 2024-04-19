@@ -8,9 +8,7 @@ from pyspark.sql import types as T
 from pyspark.sql import dataframe
 from delta.tables import *
 
-from metis_fn import fn, monad
-
-from metis_job.util import error
+from metis_job.util import fn, monad
 
 
 class ReaderSwitch(Enum):

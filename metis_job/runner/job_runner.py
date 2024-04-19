@@ -2,11 +2,10 @@ from typing import Callable, Tuple, Dict, List, Optional, Set
 from enum import Enum
 from uuid import uuid4
 
-from metis_fn import monad
 from pyspark.sql import dataframe
 
 from . import value
-from ..util import error
+from metis_job.util import error, monad
 
 
 class SimpleJob:

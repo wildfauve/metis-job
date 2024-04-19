@@ -1,8 +1,7 @@
 from typing import Callable
 
-from metis_fn import singleton
 from metis_job import runner
-from metis_job.util import logger, mod
+from metis_job.util import logger, mod, singleton
 
 
 def job(initialiser_module: str = None):

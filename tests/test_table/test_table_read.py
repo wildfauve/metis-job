@@ -15,7 +15,7 @@ def test_create_file_from_dsl_structure(di_initialise_spark,
 # Helpers
 
 def table1_definition():
-    return (J.Table(vocab=vocab())
+    return (J.Schema(vocab=vocab())
             .column()  # column1: string
             .string("columns.column1", nullable=False)
 

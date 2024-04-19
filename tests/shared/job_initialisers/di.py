@@ -1,6 +1,7 @@
 from bevy import get_repository
-from metis_fn import monad
 from pyspark.sql import SparkSession
+
+from metis_job.util import monad
 
 import metis_job
 from tests.shared import spark_test_session, namespaces_and_tables

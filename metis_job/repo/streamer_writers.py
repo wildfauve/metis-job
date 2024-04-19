@@ -30,8 +30,8 @@ class DeltaStreamingTableWriter:
     def _write_stream_append_only(self,
                                   streaming_df,
                                   stream_reader,
-                                  options: list[spark_util.SparkOption] = []):
-        opts = {**spark_util.SparkOption.function_based_options(options),
+                                  options: list[spark_util.SparkOption] = None):
+        opts = {**spark_util.SparkOption.function_based_options(options if options else []),
                 **{'checkpointLocation': stream_reader.checkpoint_location}}
         streaming_query = (streaming_df.writeStream
                            .format(self.__class__.format)

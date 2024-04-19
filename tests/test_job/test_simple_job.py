@@ -1,9 +1,8 @@
 from bevy import dependency, inject
 
 import metis_job
-from metis_fn import monad
 
-from metis_job.util import error
+from metis_job.util import error, monad
 from tests.shared import init_state_spy, data, namespaces_and_tables
 
 

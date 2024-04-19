@@ -1,8 +1,7 @@
 from __future__ import annotations
 from typing import Type
-from metis_fn import monad, fn
 
-from . import error_messages
+from . import error_messages, monad, fn
 
 def generate_error(error_cls: Type[BaseError], msg_path: tuple[int, int], *template_args):
     code, _ = msg_path

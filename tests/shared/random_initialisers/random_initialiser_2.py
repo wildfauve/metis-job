@@ -1,6 +1,5 @@
-from metis_fn import monad
-
 import metis_job
+from metis_job.util import monad
 
 from tests.shared import init_state_spy
 

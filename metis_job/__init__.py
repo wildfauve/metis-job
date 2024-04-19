@@ -26,7 +26,7 @@ from .table import (
 )
 
 from .schema import (
-    Table
+    Schema
 )
 
 from .session import (

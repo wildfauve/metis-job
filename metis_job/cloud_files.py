@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from metis_fn import monad
 from pyspark.sql import dataframe, types
 from delta.tables import *
 
 from metis_job import repo, DomainTable
 
-from .util import error
+from .util import error, monad
 
 CloudFilesStreamReader = repo.SparkRecursiveFileStreamer | repo.DatabricksCloudFilesStreamer
 CloudFilesStreamWriter = repo.SparkStreamingTableWriter | repo.DeltaStreamingTableWriter

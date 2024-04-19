@@ -1,13 +1,13 @@
 from typing import Dict, Tuple, Optional, List, Callable, Union
 
 from .value import VocabDirective
-from metis_job.util import logger, error
-from metis_fn import fn
+from metis_job.util import logger, error, fn
+from metis_job.util import fn
 
 TERM_NAMES = {"term", 'term'}
 
 """
-This is a vocab mapping module.  The vocab is laid out in a tree structure aligned, at the root to each of the column-level concepts
+This is a vocab mapping module.  The vocab is laid out in a tree schema aligned, at the root to each of the column-level concepts
 within the table.  The branches are specific routes into the concept.  There is a special branch defined as "*" which is used for concepts
 whose vocab is common across concepts.
 
@@ -16,7 +16,7 @@ Use the term_for function to determine the name in the table for all nodes in a 
 > StructField(V.term_for("*.fibo-fnd-acc-cur:hasPrice.fibo-fnd-acc-cur:hasAmount"), DecimalType(20, 6), True),
 
 defines a dataframe structured field for the leaf node fibo-fnd-acc-cur:hasPrice.fibo-fnd-acc-cur:hasAmount.  That maps to 
-{"term": "amount"}, which means that the name of that property in the structure will be "amount".  Where as the tree path 
+{"term": "amount"}, which means that the name of that property in the schema will be "amount".  Where as the tree path 
 helps us understand the Ontology path to the concept.  
 
 """

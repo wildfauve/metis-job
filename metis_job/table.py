@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from metis_fn import monad
 from pyspark.sql import dataframe
 from delta.tables import *
 
 from metis_job import repo
 from . import namespace as ns
-from .util import error
+from .util import error, monad
 
 ReaderType = repo.DeltaTableReader
 WriterType = repo.DeltaTableWriter

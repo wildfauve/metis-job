@@ -1,9 +1,8 @@
 import pytest
 import json
 from pyspark.sql.types import DecimalType, StringType
-from metis_fn import monad
 
-from metis_job.util import error
+from metis_job.util import error, monad
 from metis_job import schema as S
 
 
@@ -199,13 +198,13 @@ def test_raises_exception_when_column_cant_be_found():
 
 def test_structure_dsl_with_vocab_raise_directive():
     with pytest.raises(error.VocabNotFound):
-        (S.Table(vocab=vocab(), vocab_directives=[S.VocabDirective.RAISE_WHEN_TERM_NOT_FOUND])
+        (S.Schema(vocab=vocab(), vocab_directives=[S.VocabDirective.RAISE_WHEN_TERM_NOT_FOUND])
          .column()
          .string("not_a_column", nullable=False))
 
 
 def test_column_structure_dsl():
-    table = (S.Table(vocab=vocab())
+    table = (S.Schema(vocab=vocab())
              .column()  # column1: string
              .string("columns.column1", nullable=False)
 
@@ -419,7 +418,7 @@ def generate_root_parent():
 
 
 def table_using_factory():
-    table = S.Table(vocab=vocab())
+    table = S.Schema(vocab=vocab())
     table.column_factory(vocab_term="columns.column1",
                          struct_fn=id_type_label_struct,
                          validator=success_validator,
@@ -434,7 +433,7 @@ def table_using_factory():
 
 
 def table_with_errors():
-    table = S.Table(vocab=vocab())
+    table = S.Schema(vocab=vocab())
     table.column_factory(vocab_term="columns.column1",
                          struct_fn=id_type_label_struct,
                          validator=failure_validator,
@@ -444,7 +443,7 @@ def table_with_errors():
 
 
 def table_with_injected_columns():
-    return S.Table(vocab=vocab(), columns=[column1()])
+    return S.Schema(vocab=vocab(), columns=[column1()])
 
 
 def vocab():

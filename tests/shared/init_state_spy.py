@@ -1,4 +1,4 @@
-from metis_fn import singleton
+from metis_job.util import singleton
 
 class InitState(singleton.Singleton):
 
