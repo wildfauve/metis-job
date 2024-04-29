@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "metis-job"
-version = "0.1.23"
+version = "0.1.24"
 description = ""
 authors = ["Col Perks <wild.fauve@gmail.com>"]
 readme = "README.md"
@@ -11,6 +11,7 @@ pino = "^0.6.0"
 pendulum = "^3.0.0"
 isoduration = "^20.11.0"
 pymonad = "^2.4.0"
+jupyter = "^1.0.0"
 
 
 [tool.poetry.group.dev.dependencies]

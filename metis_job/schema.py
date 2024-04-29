@@ -70,6 +70,26 @@ class Struct:
         self.fields.append(su.build_long_field(term, self.vocab, nullable=nullable))
         return self
 
+    def short(self,
+             term,
+             nullable: bool = False):
+        self.fields.append(su.build_short_field(term, self.vocab, nullable=nullable))
+        return self
+
+    def integer(self,
+             term,
+             nullable: bool = False):
+        self.fields.append(su.build_integer_field(term, self.vocab, nullable=nullable))
+        return self
+
+
+    def bool(self,
+             term,
+             nullable: bool = False):
+        self.fields.append(su.build_bool_field(term, self.vocab, nullable=nullable))
+        return self
+
+
     def array(self,
               term,
               scalar_type,
