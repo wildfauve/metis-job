@@ -15,7 +15,7 @@ class SparkRecursiveFileStreamer:
                 .readStream
                 .options(**self._spark_opts())
                 .schema(cloud_file.schema)
-                .json(cloud_file.cloud_source, multiLine=True))
+                .json(cloud_file.cloud_source, multiLine=True, prefersDecimal=True))
 
     def _spark_opts(self):
         return metis_job.SparkOption.function_based_options(self.__class__.default_spark_options + self.spark_options)
