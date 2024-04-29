@@ -71,24 +71,22 @@ class Struct:
         return self
 
     def short(self,
-             term,
-             nullable: bool = False):
+              term,
+              nullable: bool = False):
         self.fields.append(su.build_short_field(term, self.vocab, nullable=nullable))
         return self
 
     def integer(self,
-             term,
-             nullable: bool = False):
+                term,
+                nullable: bool = False):
         self.fields.append(su.build_integer_field(term, self.vocab, nullable=nullable))
         return self
-
 
     def bool(self,
              term,
              nullable: bool = False):
         self.fields.append(su.build_bool_field(term, self.vocab, nullable=nullable))
         return self
-
 
     def array(self,
               term,
@@ -179,6 +177,30 @@ class Column:
              validator: Callable = always_valid_validator,
              cell_builder: Callable = default_cell_builder):
         self.schema = su.build_long_field(term, self.vocab, nullable=nullable)
+        return self.callback
+
+    def short(self,
+              term,
+              nullable: bool = False,
+              validator: Callable = always_valid_validator,
+              cell_builder: Callable = default_cell_builder):
+        self.schema = su.build_short_field(term, self.vocab, nullable=nullable)
+        return self.callback
+
+    def integer(self,
+                term,
+                nullable: bool = False,
+                validator: Callable = always_valid_validator,
+                cell_builder: Callable = default_cell_builder):
+        self.schema = su.build_integer_field(term, self.vocab, nullable=nullable)
+        return self.callback
+
+    def bool(self,
+             term,
+             nullable: bool = False,
+             validator: Callable = always_valid_validator,
+             cell_builder: Callable = default_cell_builder):
+        self.schema = su.build_bool_field(term, self.vocab, nullable=nullable)
         return self.callback
 
     def timestamp(self,
