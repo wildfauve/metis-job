@@ -6,12 +6,18 @@ from metis_job.repo import spark_util
 class SparkStreamingTableWriter:
     default_stream_trigger_condition = {'availableNow': True}
 
+    def __init__(self, spark_options: list[spark_util.SparkOption] = None):
+        self.spark_options = spark_options if spark_options else []
+
+
     def write_stream(self,
                      streaming_df,
                      stream_reader):
+        opts = {**spark_util.SparkOption.function_based_options(self.spark_options if self.spark_options else []),
+                **{'checkpointLocation': stream_reader.checkpoint_location}}
         streaming_query = (streaming_df
                            .writeStream
-                           .option('checkpointLocation', stream_reader.checkpoint_location)
+                           .options(**opts)
                            .trigger(**self.__class__.default_stream_trigger_condition)
                            .toTable(stream_reader.stream_to_table_name))
         streaming_query.awaitTermination()
@@ -22,6 +28,9 @@ class DeltaStreamingTableWriter:
     format = "delta"
     default_stream_trigger_condition = {'availableNow': True}
 
+    def __init__(self, spark_options: list[spark_util.SparkOption] = None):
+        self.spark_options = spark_options if spark_options else []
+
     def write_stream(self,
                      streaming_df,
                      stream_reader):
@@ -29,9 +38,8 @@ class DeltaStreamingTableWriter:
 
     def _write_stream_append_only(self,
                                   streaming_df,
-                                  stream_reader,
-                                  options: list[spark_util.SparkOption] = None):
-        opts = {**spark_util.SparkOption.function_based_options(options if options else []),
+                                  stream_reader):
+        opts = {**spark_util.SparkOption.function_based_options(self.spark_options if self.spark_options else []),
                 **{'checkpointLocation': stream_reader.checkpoint_location}}
         streaming_query = (streaming_df.writeStream
                            .format(self.__class__.format)

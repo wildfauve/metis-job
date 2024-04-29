@@ -39,12 +39,14 @@ def test_cloud_files_streaming(di_initialise_spark,
     stream_source = "tests/spark_locations/stream_source"
     checkpoint_loc = 'tests/spark_locations/checkpoints'
 
+    opts = [metis_job.SparkOption.MERGE_SCHEMA]
+
     cloud_files = metis_job.CloudFiles(spark_session=spark_test_session.spark_session(),
                                        stream_reader=metis_job.SparkRecursiveFileStreamer(),
                                        cloud_source=stream_source,
                                        checkpoint_location=checkpoint_loc,
                                        schema=namespaces_and_tables.json_file_schema,
-                                       stream_writer=metis_job.SparkStreamingTableWriter(),
+                                       stream_writer=metis_job.SparkStreamingTableWriter(opts),
                                        stream_to_table_name="dp1.sketch")
 
     df = cloud_files.read_stream()
