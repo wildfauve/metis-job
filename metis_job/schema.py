@@ -94,7 +94,7 @@ class Struct:
                   validator: Callable = always_valid_validator,
                   cell_builder: Callable = default_cell_builder):
         self.fields.append(su.build_timestamp_field(term, self.vocab, nullable=nullable))
-        return self.callback
+        return self
 
 
     def array(self,
