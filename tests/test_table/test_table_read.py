@@ -9,7 +9,7 @@ def test_create_file_from_dsl_structure(di_initialise_spark,
 
     df = table1.read()
 
-    assert df.schema == table1_definition().hive_schema()
+    assert df.schema == table1_definition().to_spark_schema()
 
 
 # Helpers
@@ -61,7 +61,7 @@ def vocab():
 class Table1(J.DomainTable):
     table_name = "table1"
 
-    schema = table1_definition().hive_schema()
+    schema = table1_definition().to_spark_schema()
 
     def after_initialise(self):
         self.perform_table_creation_protocol()

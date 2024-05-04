@@ -96,7 +96,6 @@ class Struct:
         self.fields.append(su.build_timestamp_field(term, self.vocab, nullable=nullable))
         return self
 
-
     def array(self,
               term,
               scalar_type,
@@ -148,6 +147,19 @@ class Column:
         self.callback = callback
         if self.struct_fn:
             self.build_dataframe_struct_schema()
+
+    def to_spark_schema(self, as_root=True) -> T.StructType | T.StructField:
+        """
+        A Column can be created externally from a Schema object and then added to the schema,
+        or used for transformation functions such as casting.  This function generates an
+        a Spark Struct based on the column's configuration.
+
+        Passing in as_root = False does not wrap the column schema in a StructType.
+        :return:
+        """
+        if as_root:
+            return T.StructType([self.schema])
+        return self.schema
 
     def build_dataframe_struct_schema(self):
         self.schema = self.struct_fn(self.vocab_term, self.vocab)
@@ -290,7 +302,17 @@ class Schema:
         self.columns.append(col)
         return col
 
-    def hive_schema(self):
+    def add_column(self, column: Column):
+        """
+        Add a column which has been built independently of the schema DSL.
+        :param column:
+        :return:
+        """
+        self.columns.append(column)
+        return self
+
+
+    def to_spark_schema(self):
         return T.StructType(list(map(lambda column: column.schema, self.columns)))
 
     def exception_table(self):

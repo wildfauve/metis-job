@@ -1,9 +1,10 @@
 import pytest
 import json
-from pyspark.sql.types import DecimalType, StringType
 
 from metis_job.util import error, monad
 from metis_job import schema as S
+
+from tests.shared import vocab
 
 
 def test_cell_name_from_vocab():
@@ -74,7 +75,7 @@ def test_table_hive_schema_builder():
 
     expected_schema_names = ['column_one', 'column_two']
 
-    assert [col.name for col in table.hive_schema()] == expected_schema_names
+    assert [col.name for col in table.to_spark_schema()] == expected_schema_names
 
 
 def test_column_builds_schema():
@@ -109,7 +110,7 @@ def test_column_generates_exception_column():
 
 
 def test_generates_exception_schema():
-    schema = table_using_factory().exception_table().hive_schema()
+    schema = table_using_factory().exception_table().to_spark_schema()
 
     expected_columns = ['column_one', 'column_two']
 
@@ -196,215 +197,6 @@ def test_raises_exception_when_column_cant_be_found():
         row1.cell_factory('invalid_column_name')
 
 
-def test_structure_dsl_with_vocab_raise_directive():
-    with pytest.raises(error.VocabNotFound):
-        (S.Schema(vocab=vocab(), vocab_directives=[S.VocabDirective.RAISE_WHEN_TERM_NOT_FOUND])
-         .column()
-         .string("not_a_column", nullable=False))
-
-
-def test_column_structure_dsl():
-    table = (S.Schema(vocab=vocab())
-             .column()  # column1: string
-             .string("columns.column1", nullable=False)
-
-             .column()  # column 2 struct with strings
-             .struct("columns.column2", nullable=False)
-             .string("columns.column2.sub1", nullable=False)
-             .string("columns.column2.sub1", nullable=False)
-             .end_struct()
-
-             .column()  # column 3: decimal
-             .decimal("columns.column3", DecimalType(6, 3), nullable=False)
-
-             .column()  # column 4: long
-             .long("columns.column5", nullable=False)
-
-             .column()  # column 5: array of strings
-             .array("columns.column4", StringType, nullable=False)
-
-             .column()  # column 6: array of structs
-             .array_struct("columns.column6", nullable=True)
-             .long("columns.column6.sub1", nullable=False)
-             .string("columns.column6.sub1", nullable=False)
-             .array("columns.column6.sub3", StringType, nullable=False)
-             .end_struct()  # end column6
-
-             .column()  # struct with strings and array of structs
-             .struct("columns.column7", nullable=False)
-             .string("columns.column7.sub1")
-             .struct("columns.column7.sub2", nullable=False)
-             .string("columns.column7.sub2.sub2-1")
-             .string("columns.column7.sub2.sub2-2")
-             .array_struct("columns.column7.sub3")
-             .string("columns.column7.sub3.sub3-1")
-             .string("columns.column7.sub3.sub3-2")
-             .end_struct()
-             .end_struct()
-             .end_struct()  # end column7
-             )
-
-    # print(json.dumps(table.hive_schema().jsonValue(), indent=4))
-
-    expected_schema = {
-        "type": "struct",
-        "fields": [
-            {
-                "name": "column_one",
-                "type": "string",
-                "nullable": False,
-                "metadata": {}
-            },
-            {
-                "name": "column_two",
-                "type": {
-                    "type": "struct",
-                    "fields": [
-                        {
-                            "name": "sub_one",
-                            "type": "string",
-                            "nullable": False,
-                            "metadata": {}
-                        },
-                        {
-                            "name": "sub_one",
-                            "type": "string",
-                            "nullable": False,
-                            "metadata": {}
-                        }
-                    ]
-                },
-                "nullable": False,
-                "metadata": {}
-            },
-            {
-                "name": "column_three",
-                "type": "decimal(6,3)",
-                "nullable": False,
-                "metadata": {}
-            },
-            {
-                "name": "column_five",
-                "type": "long",
-                "nullable": False,
-                "metadata": {}
-            },
-            {
-                "name": "column_four",
-                "type": {
-                    "type": "array",
-                    "elementType": "string",
-                    "containsNull": True
-                },
-                "nullable": False,
-                "metadata": {}
-            },
-            {
-                "name": "column_six",
-                "type": {
-                    "type": "array",
-                    "elementType": {
-                        "type": "struct",
-                        "fields": [
-                            {
-                                "name": "sub_one",
-                                "type": "long",
-                                "nullable": False,
-                                "metadata": {}
-                            },
-                            {
-                                "name": "sub_one",
-                                "type": "string",
-                                "nullable": False,
-                                "metadata": {}
-                            },
-                            {
-                                "name": "sub_three",
-                                "type": {
-                                    "type": "array",
-                                    "elementType": "string",
-                                    "containsNull": True
-                                },
-                                "nullable": False,
-                                "metadata": {}
-                            }
-                        ]
-                    },
-                    "containsNull": True
-                },
-                "nullable": True,
-                "metadata": {}
-            },
-            {
-                "name": "column_seven",
-                "type": {
-                    "type": "struct",
-                    "fields": [
-                        {
-                            "name": "sub_one",
-                            "type": "string",
-                            "nullable": False,
-                            "metadata": {}
-                        },
-                        {
-                            "name": "sub_two",
-                            "type": {
-                                "type": "struct",
-                                "fields": [
-                                    {
-                                        "name": "sub_two_one",
-                                        "type": "string",
-                                        "nullable": False,
-                                        "metadata": {}
-                                    },
-                                    {
-                                        "name": "sub_two_one",
-                                        "type": "string",
-                                        "nullable": False,
-                                        "metadata": {}
-                                    },
-                                    {
-                                        "name": "sub_three",
-                                        "type": {
-                                            "type": "array",
-                                            "elementType": {
-                                                "type": "struct",
-                                                "fields": [
-                                                    {
-                                                        "name": "sub_three_one",
-                                                        "type": "string",
-                                                        "nullable": False,
-                                                        "metadata": {}
-                                                    },
-                                                    {
-                                                        "name": "sub_three_two",
-                                                        "type": "string",
-                                                        "nullable": False,
-                                                        "metadata": {}
-                                                    }
-                                                ]
-                                            },
-                                            "containsNull": True
-                                        },
-                                        "nullable": False,
-                                        "metadata": {}
-                                    }
-                                ]
-                            },
-                            "nullable": False,
-                            "metadata": {}
-                        }
-                    ]
-                },
-                "nullable": False,
-                "metadata": {}
-            }
-        ]
-    }
-
-    assert table.hive_schema().jsonValue() == expected_schema
-
-
 #
 # Helpers
 #
@@ -418,7 +210,7 @@ def generate_root_parent():
 
 
 def table_using_factory():
-    table = S.Schema(vocab=vocab())
+    table = S.Schema(vocab=vocab.vocab())
     table.column_factory(vocab_term="columns.column1",
                          struct_fn=id_type_label_struct,
                          validator=success_validator,
@@ -433,7 +225,7 @@ def table_using_factory():
 
 
 def table_with_errors():
-    table = S.Schema(vocab=vocab())
+    table = S.Schema(vocab=vocab.vocab())
     table.column_factory(vocab_term="columns.column1",
                          struct_fn=id_type_label_struct,
                          validator=failure_validator,
@@ -443,76 +235,14 @@ def table_with_errors():
 
 
 def table_with_injected_columns():
-    return S.Schema(vocab=vocab(), columns=[column1()])
+    return S.Schema(vocab=vocab.vocab(), columns=[column1()])
 
 
-def vocab():
-    return {
-        "columns": {
-            "column1": {
-                "term": "column_one"
-            },
-            "column2": {
-                "term": "column_two",
-                "sub1": {
-                    "term": "sub_one"
-                },
-                "sub2": {
-                    "term": "sub_two"
-                }
-            },
-            "column3": {
-                "term": "column_three",
-            },
-            "column4": {
-                "term": "column_four",
-            },
-            "column5": {
-                "term": "column_five",
-            },
-            "column6": {
-                "term": "column_six",
-                "sub1": {
-                    "term": "sub_one"
-                },
-                "sub2": {
-                    "term": "sub_two"
-                },
-                "sub3": {
-                    "term": "sub_three"
-                }
-            },
-            "column7": {
-                "term": "column_seven",
-                "sub1": {
-                    "term": "sub_one"
-                },
-                "sub2": {
-                    "term": "sub_two",
-                    "sub2-1": {
-                        "term": "sub_two_one",
-                    },
-                    "sub2-2": {
-                        "term": "sub_two_one",
-                    }
-                },
-                "sub3": {
-                    "term": "sub_three",
-                    "sub3-1": {
-                        "term": "sub_three_one",
-                    },
-                    "sub3-2": {
-                        "term": "sub_three_two",
-                    }
-                }
-            }
-        }
-    }
 
 
 def column1():
     return S.Column(vocab_term="columns.column1",
-                    vocab=vocab(),
+                    vocab=vocab.vocab(),
                     struct_fn=id_type_label_struct,
                     validator=success_validator,
                     cell_builder=id_type_label_builder)
@@ -520,7 +250,7 @@ def column1():
 
 def column2():
     return S.Column(vocab_term="columns.column2",
-                    vocab=vocab(),
+                    vocab=vocab.vocab(),
                     struct_fn=id_type_label_struct,
                     validator=monad_success_validator,
                     cell_builder=id_type_label_builder)
